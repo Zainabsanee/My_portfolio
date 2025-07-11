@@ -1,102 +1,79 @@
 document.addEventListener('DOMContentLoaded', function() {
     const serviceCards = document.querySelectorAll('.service-card.expandable');
-    const serviceDetailsContainer = document.createElement('div');
-    serviceDetailsContainer.classList.add('service-details');
-    document.body.appendChild(serviceDetailsContainer);
-    let currentOpenDetails = null;
-
-    serviceCards.forEach((card, index) => {
-        const learnMoreBtn = card.querySelector('.learn-more-btn');
-
-        learnMoreBtn.addEventListener('click', function() {
-            const serviceName = card.querySelector('h3').textContent;
-            const detailsContentHTML = card.querySelector('.service-details .details-content').innerHTML;
-
-            serviceDetailsContainer.innerHTML = `
-                <button class="close-details-btn">Close</button>
-                <button class="exit-cards-btn">Back to Services</button>
-                <div class="details-content" data-service-index="${index}">
-                    ${detailsContentHTML}
-                </div>
-            `;
-
-            const currentDetailsContent = serviceDetailsContainer.querySelector('.details-content');
-            const slideshowContainer = currentDetailsContent.querySelector('.slideshow-container');
-            let slideIndex = 1;
-            const slides = slideshowContainer ? slideshowContainer.querySelectorAll('.slide') : [];
-
-            function showSlides(n) {
-                if (!slides || slides.length === 0) return;
-                if (n > slides.length) { slideIndex = 1 }
-                if (n < 1) { slideIndex = slides.length }
-                slides.forEach(slide => slide.style.display = 'none');
-                slides[slideIndex - 1].style.display = 'block';
-            }
-
-            window.plusSlides = function(n) {
-                showSlides(slideIndex += n);
-            }
-
-            showSlides(slideIndex);
-
-            const closeButton = serviceDetailsContainer.querySelector('.close-details-btn');
-            closeButton.addEventListener('click', closeServiceDetails);
-
-            const exitButton = serviceDetailsContainer.querySelector('.exit-cards-btn');
-            exitButton.addEventListener('click', closeServiceDetails);
-
-            const contactButton = currentDetailsContent.querySelector('.contact-me-btn');
-            if (contactButton) {
-                contactButton.addEventListener('click', () => {
-                    closeServiceDetails();
-                    document.querySelector('#contact').scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                });
-            }
-
-            serviceDetailsContainer.classList.add('open');
-            currentOpenDetails = serviceDetailsContainer;
+  
+    serviceCards.forEach(card => {
+      const learnMoreBtn = card.querySelector('.learn-more-btn');
+      const serviceDetails = card.querySelector('.service-details');
+      const closeButton = serviceDetails.querySelector('.close-details-btn');
+      const exitButton = serviceDetails.querySelector('.exit-cards-btn');
+      const contactButton = serviceDetails.querySelector('.contact-me-btn');
+  
+      learnMoreBtn.addEventListener('click', function() {
+        serviceDetails.classList.add('open');
+        showSlides(1);
+      });
+  
+      closeButton.addEventListener('click', () => {
+        serviceDetails.classList.remove('open');
+      });
+  
+      exitButton.addEventListener('click', () => {
+        serviceDetails.classList.remove('open');
+      });
+  
+      if (contactButton) {
+        contactButton.addEventListener('click', () => {
+          serviceDetails.classList.remove('open');
+          document.querySelector('#contact').scrollIntoView({ behavior: 'smooth' });
         });
+      }
+  
+      let slideIndex = 1;
+      const slides = serviceDetails.querySelectorAll('.slide');
+      const prevBtn = serviceDetails.querySelector('.prev');
+      const nextBtn = serviceDetails.querySelector('.next');
+  
+      function showSlides(n) {
+        if (!slides.length) return;
+        if (n > slides.length) slideIndex = 1;
+        if (n < 1) slideIndex = slides.length;
+        slides.forEach(slide => slide.style.display = 'none');
+        slides[slideIndex - 1].style.display = 'block';
+      }
+  
+      function plusSlides(n) {
+        showSlides(slideIndex += n);
+      }
+  
+      if (prevBtn) prevBtn.onclick = () => plusSlides(-1);
+      if (nextBtn) nextBtn.onclick = () => plusSlides(1);
     });
-
-    function closeServiceDetails() {
-        if (currentOpenDetails) {
-            currentOpenDetails.classList.remove('open');
-            currentOpenDetails.innerHTML = '';
-            currentOpenDetails = null;
-            document.body.style.overflow = 'auto';
-        }
+  
+    // Rates toggle
+    const ratesLink = document.querySelector('a[href="#rates"]');
+    const ratesSection = document.getElementById("rates");
+    const closeRatesBtn = document.getElementById("closeRates");
+  
+    if (ratesLink) {
+      ratesLink.addEventListener("click", function (e) {
+        e.preventDefault();
+        ratesSection.classList.remove("hidden");
+        window.scrollTo({ top: ratesSection.offsetTop, behavior: "smooth" });
+      });
     }
-
-    document.addEventListener('click', function(event) {
-        if (currentOpenDetails && !currentOpenDetails.contains(event.target) && !event.target.classList.contains('learn-more-btn')) {
-            closeServiceDetails();
-        }
-    });
-
-    const body = document.querySelector('body');
-    const observer = new MutationObserver(function(mutationsList, observer) {
-        for(let mutation of mutationsList) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                if (currentOpenDetails && currentOpenDetails.classList.contains('open')) {
-                    body.style.overflow = 'hidden';
-                } else {
-                    body.style.overflow = 'auto';
-                }
-            }
-        }
-    });
-
-    observer.observe(document.body, { attributes: true, subtree: false, attributeFilter: ['class', 'style'] });
-
+  
+    if (closeRatesBtn) {
+      closeRatesBtn.addEventListener("click", function () {
+        ratesSection.classList.add("hidden");
+      });
+    }
+  
+    // Smooth scroll
     document.querySelectorAll('nav a[href^="#"], .hero-buttons a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
-        });
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+      });
     });
-});
-
+  });
+  
